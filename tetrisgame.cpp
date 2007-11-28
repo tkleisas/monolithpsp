@@ -87,8 +87,8 @@ TetrisGame::TetrisGame()
 	xpos=0;
 	ypos=0;
 	explosionComplete=true;
-	acceleration = 0.008;
-	explosionFrames=15;
+	acceleration = 0.001;
+	explosionFrames=60;
 	explosionCurrentFrame=0;
 	explosion=false;	
 	isPaused=false;
@@ -408,64 +408,46 @@ void TetrisGame::DrawFallingPiece()
 }
 void TetrisGame::DrawExplosion()
 {
-	if(explosionCurrentFrame<explosionFrames)
+	vector<Explosion>::iterator iter=explosions.end();
+	while(iter!=explosions.begin())
 	{
+		Explosion e=*iter;
 		
-		for(int i=0;i<explosion_cubes.size();i++)
+		if(e.frame>explosionFrames)
 		{
-
 			
-			Position theCube = explosion_cubes[i];
-			theCube.x = theCube.x+explosion_velocities[i].x*explosionCurrentFrame;
-			theCube.y = theCube.y+explosion_velocities[i].y*explosionCurrentFrame;
-			theCube.z = theCube.z+explosion_velocities[i].z*explosionCurrentFrame;
-			
-			DrawCube(theCube.x,theCube.y,theCube.z,0.0,0.0,0.0,explosion_colors[i]);
-
-			explosion_cubes[i] = theCube;
-			
-			explosion_velocities[i].y = explosion_velocities[i].y-acceleration;
-
+			explosions.erase(iter);
 		}
-		explosionCurrentFrame++;
+		else
+		{
+			DrawCube(e.x,e.y,e.z,0.0,0.0,0.0,e.color);
+			e.x=e.x+e.velx*e.frame;
+			e.y=e.y+e.vely*e.frame;
+			e.z=e.z+e.velz*e.frame;
+			e.vely=e.vely-acceleration*e.frame;
+			e.frame++;
+			*iter=e;
+		}
+		iter--;
 	}
-	else
-	{
-		ClearExplosion();
-		explosionComplete = true;
-		explosion = false;
-		tetris.GameLoop();
-	}
+
 
 }
 void TetrisGame::ClearExplosion()
 {
-	explosion_velocities.clear();
-	explosion_cubes.clear();
-	explosion_colors.clear();
+	explosions.clear();	
 	
 }
 void TetrisGame::CreateCubeExplosion(int x, int y, unsigned int color)
 {
-	Position c;
 	
 
-	c.x=-5.0f+x*1.0f;
-	c.y=9.0f-y*1.0f;
-	c.z=-2.5f;
-	explosion_cubes.push_back(c);
+
 	float velx = (((rand()%2)?-1:1))*(rand()%100/2000.0);
 	float vely = (((rand()%2)?-1:1))*(rand()%100/2000.0);
 	float velz = (((rand()%2)?-1:1))*(rand()%100/2000.0);
-	
-	Position pos;
-	pos.x=velx;
-	pos.y=vely;
-	pos.z=velz;
-	
-	explosion_velocities.push_back(pos);
-	explosion_colors.push_back(color);
-	
+	Explosion e(-5.0f+x*1.0f,9.0f-y*1.0f,-2.5f,velx,vely,velz,0,color);
+	explosions.push_back(e);
 }
 void TetrisGame::CreateLineExplosion(int line)
 {
@@ -485,8 +467,8 @@ bool TetrisGame::CheckExplosions()
 	
 	if(clearedLines>0)
 	{
-		explosionComplete=false;
-		explosionCurrentFrame=0;
+		
+		
 		for(int i=0;i<GRID_MAX_HEIGHT;i++)
 		{
 			if(tetris.cleared_lines[i]==1)
@@ -519,12 +501,13 @@ void TetrisGame::GameLoop()
 	unsigned int minKeyTime = 100;	
 	float g_valyz=0;
 	float g_valxz=0;
+	sceKernelDcacheWritebackAll();
+	ClearExplosion();
 	while(running())
 	{
-		if(!explosion)
-		{
-			sceKernelDelayThread(1000);
-		}
+
+		sceKernelDelayThread(1000);
+
 		sceGuStart(GU_DIRECT,list);
 
 
@@ -599,19 +582,17 @@ void TetrisGame::GameLoop()
 			}
 
 		}		
-		if(explosion)
-		{
-			DrawExplosion();
+
+		DrawExplosion();
 			
-		}
-		else
+
+
+		tetris.FlagCompletedLines();
+		if(tetris.GetClearedLineCount()>0)
 		{
-			tetris.FlagCompletedLines();
-			if(tetris.GetClearedLineCount()>0)
-			{
-				CheckExplosions();
+			CheckExplosions();
 				
-			}
+		
 		}
 		DrawBoard();
 		RotateAngle = RotateAngle+0.01f;
@@ -627,6 +608,7 @@ void TetrisGame::GameLoop()
 			tetris.InitGame(1);
 			tetris.SetStatus(TETRIS_PLAYING);
 			tetris.ClearGrid();
+			ClearExplosion();
 			tetris.TimerEnabled_ = true;
 			now=tickcounter.GetTicks();
 			lastKeyPress = tickcounter.GetTicks();
@@ -647,18 +629,18 @@ void TetrisGame::GameLoop()
 		else if(timenow>now+tetris.timer_)
 		{
 
-			if(!explosion)
-			{
-				tetris.GameLoop();
+			
+			
+			tetris.GameLoop();
 
-				now = tickcounter.GetTicks();
-			}
+			now = tickcounter.GetTicks();
+			
 			
 		}
 		else
 		{
 		
-			if(done==-1 && !explosion)
+			if(done==-1)
 			{
 				if(tickcounter.GetTicks()-lastKeyPress>minKeyTime)
 				{
@@ -667,7 +649,7 @@ void TetrisGame::GameLoop()
 				lastKeyPress = tickcounter.GetTicks();
 				
 			}
-			if(done==-2 && !explosion)
+			if(done==-2)
 			{
 				if(tickcounter.GetTicks()-lastKeyPress>minKeyTime)
 				{
@@ -677,7 +659,7 @@ void TetrisGame::GameLoop()
 				
 			}
 
-			if(done==-4 && !explosion)
+			if(done==-4)
 			{
 				if(tickcounter.GetTicks()-lastKeyPress>minKeyTime)
 				{
@@ -686,7 +668,7 @@ void TetrisGame::GameLoop()
 				lastKeyPress = tickcounter.GetTicks();
 
 			}
-			if(done==-8 && !explosion)
+			if(done==-8 )
 			{
 
 				tetris.GameLoop();
@@ -698,7 +680,7 @@ void TetrisGame::GameLoop()
 		
 		}
 		//sceGumPopMatrix();
-		sceKernelDcacheWritebackAll();
+		
 		sceGuFinish();
 		sceGuSync(0,0);
 
