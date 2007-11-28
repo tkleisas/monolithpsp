@@ -4,7 +4,66 @@
 #include "tickcounter.h"
 using namespace std;
 
-
+struct Explosion
+{
+	public:
+	Explosion(float x,float y,float z,float velx,float vely,float velz,unsigned int frame,unsigned int color)
+	{
+		this->x=x;
+		this->y=y;
+		this->z=z;
+		this->velx=velx;
+		this->vely=vely;
+		this->velz=velz;
+		this->frame=frame;
+		this->color=color;
+	};
+	Explosion()
+	{
+		this->x=0.0f;
+		this->y=0.0f;
+		this->z=0.0f;
+		this->velx=0.0f;
+		this->vely=0.0f;
+		this->velz=0.0f;
+		this->frame=0;
+		this->color=0;
+	};
+	Explosion& operator=(const Explosion& a)
+	{
+		if(this!=&a)
+		{
+			x=a.x;
+			y=a.y;
+			z=a.z;
+			velx=a.velx;
+			vely=a.vely;
+			velz=a.velz;
+			frame=a.frame;
+			color=a.color;
+		}
+		return *this;
+	};
+	Explosion(const Explosion& a)
+	{
+		x=a.x;
+		y=a.y;
+		z=a.z;
+		velx=a.velx;
+		vely=a.vely;
+		velz=a.velz;
+		frame=a.frame;
+		color=a.color;
+	};
+	float x;
+	float y;
+	float z;
+	float velx;
+	float vely;
+	float velz;
+	unsigned int frame;
+	unsigned int color;
+};
 class TetrisGame
 {
 
@@ -37,6 +96,7 @@ private:
 	vector<Position> explosion_cubes;
 	vector<Position> explosion_velocities;
 	vector<unsigned int> explosion_colors;
+	vector<Explosion> explosions;
 	float acceleration;
 	int explosionFrames;
 	int explosionCurrentFrame;
