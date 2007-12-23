@@ -25,6 +25,7 @@ PSP_HEAP_SIZE_KB(4096);
 //PSP_HEAP_SIZE_MAX();
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER| THREAD_ATTR_VFPU);
 PSP_MAIN_THREAD_STACK_SIZE_KB(1024);
+int defaultminkeytime=75;
 TickCounter counter;
 Cube c0(0xff0000ff);
 Cube c1(0xff00ff00);
@@ -498,7 +499,7 @@ void TetrisGame::GameLoop()
 	unsigned char gameoverstep=1;
 	unsigned int now=tickcounter.GetTicks();
     unsigned int lastKeyPress = tickcounter.GetTicks();
-	unsigned int minKeyTime = 100;	
+	unsigned int minKeyTime = defaultminkeytime;	
 	float g_valyz=0;
 	float g_valxz=0;
 	sceKernelDcacheWritebackAll();
@@ -612,7 +613,7 @@ void TetrisGame::GameLoop()
 			tetris.TimerEnabled_ = true;
 			now=tickcounter.GetTicks();
 			lastKeyPress = tickcounter.GetTicks();
-			minKeyTime = 100;			
+			minKeyTime = defaultminkeytime;			
 
 		}
 		if(isPaused)
@@ -661,7 +662,7 @@ void TetrisGame::GameLoop()
 
 			if(done==-4)
 			{
-				if(tickcounter.GetTicks()-lastKeyPress>minKeyTime)
+				if(tickcounter.GetTicks()-lastKeyPress>minKeyTime*2)
 				{
 					tetris.RotateCurrentBlockClockwise();
 				}
