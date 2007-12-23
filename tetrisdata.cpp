@@ -489,10 +489,10 @@ void Tetris::MoveBlockLeft(void)
 void Tetris::MoveBlockRight(void)
 {
 	if(
-		(this->CurrentBlock_.subblocks_[0].Xpos+this->CurrentBlock_.XPos_<GRID_MAX_WIDTH) &&
-		(this->CurrentBlock_.subblocks_[1].Xpos+this->CurrentBlock_.XPos_<GRID_MAX_WIDTH) &&
-		(this->CurrentBlock_.subblocks_[2].Xpos+this->CurrentBlock_.XPos_<GRID_MAX_WIDTH) &&
-		(this->CurrentBlock_.subblocks_[3].Xpos+this->CurrentBlock_.XPos_<GRID_MAX_WIDTH)
+		(this->CurrentBlock_.subblocks_[0].Xpos+this->CurrentBlock_.XPos_<GRID_MAX_WIDTH-1) &&
+		(this->CurrentBlock_.subblocks_[1].Xpos+this->CurrentBlock_.XPos_<GRID_MAX_WIDTH-1) &&
+		(this->CurrentBlock_.subblocks_[2].Xpos+this->CurrentBlock_.XPos_<GRID_MAX_WIDTH-1) &&
+		(this->CurrentBlock_.subblocks_[3].Xpos+this->CurrentBlock_.XPos_<GRID_MAX_WIDTH-1)
 	)
 	{
 		if(
@@ -757,13 +757,13 @@ void Tetris::RotateCurrentBlockClockwise(void)
 	this->CurrentBlock_.RecalcBlockOrientation();
 	for(int i=0;i<4;i++)
 	{
-		if (this->CurrentBlock_.XPos_+this->CurrentBlock_.subblocks_[i].Xpos>GRID_MAX_WIDTH)
+		if (this->CurrentBlock_.XPos_+this->CurrentBlock_.subblocks_[i].Xpos>=GRID_MAX_WIDTH)
 		{
 			this->CurrentBlock_.orientation_ = currentorientation;
 			this->CurrentBlock_.RecalcBlockOrientation();
 			return;
 		}
-		if (this->CurrentBlock_.YPos_+this->CurrentBlock_.subblocks_[i].Ypos>GRID_MAX_HEIGHT)
+		if (this->CurrentBlock_.YPos_+this->CurrentBlock_.subblocks_[i].Ypos>=GRID_MAX_HEIGHT)
 		{
 			this->CurrentBlock_.orientation_ = currentorientation;
 			this->CurrentBlock_.RecalcBlockOrientation();
