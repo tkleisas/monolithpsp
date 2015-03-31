@@ -1,0 +1,2 @@
+Monolith is a 3D tetris like game for the sony PSP (PlayStation Portable). It is written using the PSPSDK, found at http://www.ps2dev.org
+The game features a "classic tetris" gameplay mode, as well as other modes.
